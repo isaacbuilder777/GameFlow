@@ -1,0 +1,67 @@
+# Skill dependency graph. /next reads this + skill-log.jsonl to suggest work.
+# requires: prerequisite producers must have fired for the relevant feature.
+# produces: markers written to production/skill-log.jsonl by post_skill.py.
+# version: bump when the graph structure changes incompatibly.
+
+version: 1
+
+skills:
+  start:
+    requires: []
+    produces: [project_initialized]
+    description: Set engine, pillars, review mode. Run once at project start.
+
+  next:
+    requires: []
+    produces: []
+    description: Recommend what to do next based on graph state.
+
+  design:
+    requires: [project_initialized]
+    produces: [design_doc]
+    description: Produce a GDD section for a feature, system, or level.
+
+  build:
+    requires: [design_doc]
+    produces: [implementation]
+    description: Implement from an approved design doc.
+
+  review:
+    requires: [implementation]
+    produces: [reviewed]
+    description: Quality pass against rules, engine conventions, and design fit.
+
+  test:
+    requires: [implementation]
+    produces: [tested]
+    description: Author and run verification (unit, integration, smoke).
+
+  ship:
+    requires: [reviewed, tested]
+    produces: [released]
+    description: Package a release with changelog and patch notes.
+
+  learn:
+    requires: []
+    produces: [lesson_captured]
+    description: Capture a lesson to Claude memory for future sessions.
+
+  balance:
+    requires: [design_doc]
+    produces: [balanced]
+    description: Tune numeric values against design formulas.
+
+  playtest:
+    requires: [implementation]
+    produces: [playtested]
+    description: Structured playtest report — what worked, what didn't, next hypothesis.
+
+  asset:
+    requires: [project_initialized]
+    produces: [asset_spec]
+    description: Asset spec, naming validation, and directory audit.
+
+  perf:
+    requires: [implementation]
+    produces: [perf_checked]
+    description: Frame budget, allocation hotspots, draw calls.
