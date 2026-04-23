@@ -1,73 +1,96 @@
 # GameFlow
 
-A Claude Code template for indie and solo game development. A leaner, smarter alternative to [Claude-Code-Game-Studios](https://github.com/Donchitos/Claude-Code-Game-Studios).
+A Claude Code project template for indie and solo game development. Turns a Claude Code session into a coordinated studio with six specialized roles, twelve workflow commands, and a dependency graph that tells you what to do next.
 
-**6 roles. 12 skills. One dependency graph. Your engine, configured in one file.**
+## What it gives you
 
-## Why not the original?
-
-The original pioneered the pattern — huge credit for that. But it has real weaknesses for day-to-day solo dev:
-
-- **49 agents is overkill.** `gameplay-programmer` vs `engine-programmer` vs `ai-programmer` vs `tools-programmer` all do the same thing from an LLM's perspective — write code in your project. Role-splitting creates routing ambiguity, not clarity.
-- **72 skills is too many to remember.** Past ~15, discovery fails. Most of the 72 are parameters (`/team-combat`, `/team-narrative`, `/team-ui`) or duplicates (`/code-review` + `/design-review` + `/architecture-review`).
-- **Heuristic stage detection.** `/project-stage-detect` guesses from filenames. A dependency graph is deterministic.
-- **Sprint ceremony for solo devs.** `/create-epics`, `/sprint-plan`, `/retrospective` are enterprise overhead.
-- **Static.** The original doesn't learn from your corrections between sessions.
-- **Bash hooks on Windows.** Requires Git Bash. Python is cleaner.
-
-## What GameFlow does differently
-
-| | Original | GameFlow |
-|---|---|---|
-| Agents | 49 | 6 |
-| Skills | 72 | 12 |
-| Hooks | 12 bash | 3 Python |
-| Doc templates | 39 files | generated inline |
-| Engine support | 3 agent sets (Godot/Unity/Unreal) | 1 config file |
-| Stage detection | heuristic | dependency graph |
-| Learns between sessions | no | yes, via `/learn` → Claude memory |
-| Sprint ceremony | yes | no |
+- **Six roles** Claude can step into — director, designer, builder, reviewer, tester, releaser. Each has a defined scope and delegates to the others.
+- **Twelve slash commands** covering the full lifecycle: design, build, review, test, ship — plus game-specific commands for balance tuning, playtesting, asset planning, and performance.
+- **A skill dependency graph** so `/next` can always tell you what's ready to work on and what's still blocked.
+- **Path-scoped rules** that automatically enforce different coding standards for gameplay, engine, AI, networking, UI, shaders, and tools.
+- **Engine awareness** — one config file (`.claude/engine.md`) teaches Claude the conventions for Godot 4, Unity, Unreal 5, or your custom engine.
+- **Review modes** — `solo`, `lean`, or `full` — controlling how much gatekeeping happens on each change.
+- **Python hooks** that orient Claude at session start, block risky bash commands, and keep a skill-completion log.
+- **Cross-session memory** — `/learn` captures lessons into Claude's memory so the next session starts smarter than the last.
 
 ## Setup
 
 ```
-git clone <this-repo> my-game
+git clone https://github.com/isaacbuilder777/GameFlow.git my-game
 cd my-game
 claude
 ```
 
-Then `/start` — picks your engine, sets game pillars, initializes the project.
+Then run `/start` on your first session. It will ask:
 
-## The 12 skills
+- Which engine you're using (and its version)
+- Your review mode
+- Your game's pillars (3-5 sentences on what the game IS)
 
-**Core workflow:** `/start` `/next` `/design` `/build` `/review` `/test` `/ship` `/learn`
+From there, type `/next` any time you're unsure what to do.
 
-**Game-specific:** `/balance` `/playtest` `/asset` `/perf`
+## The twelve commands
 
-Run `/next` anytime you're not sure what to do — it reads the dependency graph and tells you what's ready.
+**Core workflow:**
 
-## Engines
+| Command | Purpose |
+|---|---|
+| `/start` | Initialize the project: pick engine, set pillars, choose review mode |
+| `/next` | Read the dependency graph and recommend the next command |
+| `/design` | Write a design doc for a feature, system, level, or narrative beat |
+| `/build` | Implement from an approved design |
+| `/review` | Quality pass against rules and design-fit |
+| `/test` | Author and run verification |
+| `/ship` | Package a release with changelog and patch notes |
+| `/learn` | Capture a lesson to Claude memory for future sessions |
 
-Edit `.claude/engine.md` on first run — pick **Godot 4**, **Unity**, **Unreal 5**, or `custom`. The builder and reviewer load this when editing engine-specific code.
+**Game-specific:**
+
+| Command | Purpose |
+|---|---|
+| `/balance` | Tune numeric values against design formulas |
+| `/playtest` | Structured playtest report with hypothesis and follow-ups |
+| `/asset` | Asset specs, naming audits, and directory checks |
+| `/perf` | Frame budget, allocation hotspots, draw calls |
+
+## The six roles
+
+| Role | What it owns |
+|---|---|
+| **director** | Creative vision, game pillars, genre fit, scope protection, final approvals |
+| **designer** | Game design, systems, economy, level design, narrative, UX, accessibility |
+| **builder** | Gameplay, engine, AI, shaders, networking, UI, and tooling code |
+| **reviewer** | Code review, rule enforcement, design conformance |
+| **tester** | Unit, integration, and smoke tests, plus manual QA scripts |
+| **releaser** | Build packaging, changelogs, patch notes, storefront copy |
+
+Roles delegate explicitly and stay in their lane. The designer doesn't write code; the builder doesn't rewrite designs; the reviewer critiques but doesn't apply fixes.
 
 ## Layout
 
 ```
 .claude/
-  settings.json       hooks + permissions
+  settings.json       hooks + permission rules
   graph.yaml          skill dependency graph
   engine.md           your engine config
-  agents/             6 roles
-  skills/             12 slash commands
-  hooks/              3 Python hooks
-  rules/              3 path-scoped rule files
-design/               GDD and design docs
-src/                  gameplay, engine, ai, networking, ui, shaders
-assets/               art, audio, data
+  agents/             6 role definitions
+  skills/             12 slash-command instruction files
+  hooks/              3 Python hooks (session start, pre-tool, post-skill)
+  rules/              code, docs, and assets rules
+design/               vision and feature design docs
+src/                  gameplay, engine, ai, networking, ui, shaders, tools
+assets/               sprites, models, animations, audio, data
 tests/                unit, integration, playtest scripts
-production/           release-mode, skill-log, changelog
-prototypes/           throwaway experiments, isolated from src/
+production/           review mode, skill log, playtest reports
+prototypes/           throwaway experiments (isolated from src/)
+docs/                 ADRs, release notes, onboarding
 ```
+
+## Philosophy
+
+Games ship when the loop is clear: design → build → test → review → ship. GameFlow makes that loop explicit. A dependency graph means you can't accidentally skip a step. Path-scoped rules mean your gameplay code doesn't drift into a tangled mess while your engine code calls for a different discipline. Review modes mean a prototype can move fast while a core feature gets the gates it deserves.
+
+The template is opinionated on structure and silent on everything else — it tells you when to design and when to build, but never what to design or how to build it. Those calls stay with you.
 
 ## License
 

@@ -1,61 +1,59 @@
 # GameFlow
 
-A lean Claude Code template for indie and solo game development. 6 roles, 12 skills, one dependency graph. Turns a Claude Code session into a coordinated studio without the 49-agent ceremony.
+A Claude Code template that organizes a game-development session into a coordinated studio. Six roles, twelve commands, one dependency graph.
 
 ## What this is
 
-An opinionated workflow for shipping games: design → build → test → review → ship, enforced by a skill dependency graph so you can't accidentally skip a step. Agents adapt to your engine (Godot / Unity / Unreal) via a single config file instead of a pile of specialist agent files.
+An opinionated workflow for shipping games: design → build → test → review → ship, enforced by a skill dependency graph so steps can't be silently skipped. Roles adapt to your engine (Godot / Unity / Unreal / custom) via a single config file. Review intensity is tunable per-project so prototypes move fast and core systems get the gates they need.
 
 ## Engine
 
-Set your engine and version in `.claude/engine.md`. The builder and reviewer load this automatically when touching engine-specific code (shaders, ECS, Blueprints, GDExtension, etc.). Supported: **Godot 4**, **Unity 2022+**, **Unreal 5**, or `custom` for your own engine.
+Set your engine and version in `.claude/engine.md` on first run. The builder and reviewer load this when touching engine-specific code — Godot signals and GDScript patterns, Unity ScriptableObjects and serialization, Unreal UPROPERTY and replication, or whatever custom engine you've defined.
 
 ## Review intensity
 
-Set in `production/review-mode.txt`, override per-skill with `--review <mode>`:
+Set in `production/review-mode.txt`. Override per-skill with `--review <mode>`.
 
-- **`solo`** — no director gates. Fast, one-pass. Best for prototyping or small fixes.
+- **`solo`** — no director gates. One-pass work. Best for prototyping or small fixes.
 - **`lean`** — director approves phase transitions only (design→build, build→ship). Default.
-- **`full`** — director reviews every significant decision. Use for your main project's core features.
+- **`full`** — director reviews every significant decision. Use on high-stakes or core features.
 
-## Roles (6, not 49)
+## Roles
 
-| Role | Covers (inline sub-specialization) |
+| Role | What it owns |
 |---|---|
 | **director** | Creative vision, pillars, genre fit, scope protection, final approval |
 | **designer** | Game design, systems, economy, level design, narrative, UX, accessibility |
 | **builder** | Gameplay code, engine code, AI, shaders/VFX, networking, UI, tools |
-| **reviewer** | Code quality, rule enforcement, design-fit, game feel |
+| **reviewer** | Code quality, rule enforcement, design-fit |
 | **tester** | Automated tests, playtest scripts, manual QA, balance validation |
-| **releaser** | Build pipelines, storefront packaging, changelogs, patch notes |
+| **releaser** | Build packaging, changelogs, patch notes, storefront copy |
 
-The original's `gameplay-programmer` / `engine-programmer` / `ai-programmer` / `tools-programmer` / `network-programmer` / `ui-programmer` are all **builder** — one role with inline sub-specialization. Prompts say "if editing `src/gameplay/**`, do X; if editing `src/engine/**`, do Y." LLMs don't need org charts; they need sharp prompts.
+Sub-specializations (frontend, backend, ML, shaders, networking, tooling, level design, economy design, narrative) are handled inline by the appropriate role, not as separate agents. The builder reads its path-scoped rules and engine config to know which conventions apply.
 
-## Skills (12, not 72)
+## Skills
 
-**Core workflow (8):**
+**Core workflow:**
 
 - `/start` — pick engine, set pillars, initialize project
 - `/next` — graph-driven recommendation for what to do next
-- `/design` — produce a GDD section for a feature or system
+- `/design` — produce a design doc for a feature or system
 - `/build` — implement from an approved design
 - `/review` — quality pass against rules and design
 - `/test` — author and run verification
 - `/ship` — package a release with changelog and patch notes
-- `/learn` — capture lessons to Claude memory so future sessions start smarter
+- `/learn` — capture a lesson to Claude memory so the next session starts smarter
 
-**Game-specific (4):**
+**Game-specific:**
 
-- `/balance` — tune numbers against design formulas (damage curves, economy, drop rates)
+- `/balance` — tune numeric values against design formulas
 - `/playtest` — structured playtest report (what worked, what didn't, next hypothesis)
-- `/asset` — asset spec + naming audit for `assets/`
-- `/perf` — performance pass (frame budget, alloc hotspots, draw calls)
-
-That's it. No `/team-combat`, `/team-narrative`, `/team-ui` — those were parameters, not skills. No `/create-epics`, `/sprint-plan`, `/retrospective` — solo/small-team dev doesn't need sprint ceremony.
+- `/asset` — asset spec writing, naming validation, directory audit
+- `/perf` — frame budget, allocation hotspots, draw calls, shader cost
 
 ## Skill dependency graph
 
-`.claude/graph.yaml` defines prerequisites:
+Defined in `.claude/graph.yaml`. Each skill declares prerequisites:
 
 ```
 /design      requires project_initialized
@@ -69,57 +67,56 @@ That's it. No `/team-combat`, `/team-narrative`, `/team-ui` — those were param
 /perf        requires implementation
 ```
 
-`/next` reads the graph + `production/skill-log.jsonl` and tells you what's ready. No heuristics, no `/project-stage-detect` guessing.
+`/next` reads the graph and `production/skill-log.jsonl` and deterministically picks what's ready.
 
 ## Path-scoped rules
 
-Automatically loaded when editing matching paths:
+Automatically applied when editing matching paths:
 
-| Path | Rule |
+| Path | Focus |
 |---|---|
-| `src/gameplay/**` | Data-driven values, delta-time correct, no UI refs, no per-frame allocs |
+| `src/gameplay/**` | Data-driven values, delta-time correctness, no UI refs, no per-frame allocs |
 | `src/engine/**` | Zero allocations in hot paths, thread safety, API stability |
 | `src/ai/**` | Performance budgets, debuggable decisions, data-driven parameters |
-| `src/networking/**` | Server-authoritative, versioned messages, no trust of client |
+| `src/networking/**` | Server-authoritative, versioned messages, no client trust |
 | `src/ui/**` | No game state ownership, localization-ready, accessibility |
 | `src/shaders/**` | GPU cost budget, platform fallbacks |
+| `src/tools/**` | Idempotent, auditable, cross-platform |
 | `design/**` | Required GDD sections, formulas over prose |
-| `assets/**` | Naming conventions, file-size limits, metadata present |
+| `assets/**` | Naming conventions, file-size limits |
 
-All defined in `.claude/rules/code.md`, `.claude/rules/docs.md`, `.claude/rules/assets.md`.
+Defined in `.claude/rules/code.md`, `.claude/rules/docs.md`, `.claude/rules/assets.md`.
 
 ## Hooks
 
 Three Python hooks, fail-soft if Python is missing:
 
-- `session_start.py` — orients Claude with git state, engine, and last skill run
-- `pre_tool.py` — blocks risky bash (`git push --force`, `rm -rf /`, `--no-verify`)
-- `post_skill.py` — logs skill completion to `production/skill-log.jsonl`
+- **`session_start.py`** — orients Claude with branch, uncommitted changes, engine, review mode, and last skill run.
+- **`pre_tool.py`** — blocks risky bash (`git push --force`, `rm -rf /`, `--no-verify`, `butler push`, `steamcmd app_update`).
+- **`post_skill.py`** — logs Task (agent/skill) completions to `production/skill-log.jsonl`.
 
-## How agents coordinate
+## How roles coordinate
 
-- Explicit delegation via the Agent tool. Director doesn't "auto-route" — a skill decides which role to invoke.
-- Director breaks ties. Designer and builder disagree on scope? Director decides.
-- Roles respect file scope. Builder doesn't edit `design/`. Designer doesn't edit `src/`. Enforced by review.
+- Explicit delegation via Claude Code's Agent tool. A skill picks which role to invoke.
+- Director breaks ties when designer and builder disagree on scope or approach.
+- Roles respect file scope. Builder doesn't edit `design/`. Designer doesn't edit `src/`. Reviewer flags violations.
 - Memory is shared state across sessions. `/learn` writes to `~/.claude/memory/` — the template compounds.
 
-## Compared to Claude-Code-Game-Studios
+## How the template compounds
 
-|  | Game Studios (original) | GameFlow |
-|---|---|---|
-| Agents | 49 across 3 tiers | 6 flat |
-| Skills | 72 | 12 |
-| Hooks | 12 bash scripts | 3 Python |
-| Doc templates | 39 files | generated inline against rules |
-| Engine support | 3 specialist agent sets | 1 config file |
-| Ordering | heuristic `/project-stage-detect` | deterministic graph |
-| Learning across sessions | none | `/learn` → Claude memory |
-| Sprint ceremony | `/create-epics`, `/create-stories`, `/sprint-plan`, `/sprint-status`, `/estimate`, `/retrospective` | none (not needed for indie/solo) |
+`/learn` captures four kinds of lessons:
+
+- **Corrections** — when the user pushed back on an approach, and why.
+- **Validations** — when a non-obvious choice worked, and the reasoning.
+- **Project facts** — constraints, deadlines, platform targets not visible in code.
+- **References** — external systems, dashboards, asset libraries the project relies on.
+
+These land in `~/.claude/memory/` and load automatically at the start of every future session on this project.
 
 ## Philosophy
 
-**Fewer, smarter pieces.** LLMs don't benefit from role-splitting — they benefit from sharp, non-overlapping prompts. The original's 49 agents have routing ambiguity that a solo dev will hit on day one.
+**Deterministic over heuristic.** A dependency graph that says "design before build" is worth more than any number of guesses based on filenames.
 
-**Deterministic over heuristic.** A dependency graph that says "you need a design doc before you can `/build`" is better than a stage-detector that guesses from filenames.
+**Fewer, sharper pieces.** Each role has a non-overlapping scope and a specific output. Each skill is invoked for one job, not twelve.
 
-**Compounds across sessions.** `/learn` turns every correction or validation into a memory file, so session 50 is strictly better than session 1.
+**Compounds across sessions.** Every correction or validation captured via `/learn` makes the next session better than the last. A project that runs this template for six months is running a meaningfully smarter version of it than the one that cloned it.
