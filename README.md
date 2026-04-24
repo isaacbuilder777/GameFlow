@@ -13,6 +13,10 @@ A Claude Code project template for indie and solo game development. Turns a Clau
 - **Python hooks** that orient Claude at session start, block risky bash commands, and keep a skill-completion log.
 - **Cross-session memory** — `/learn` captures lessons into Claude's memory so the next session starts smarter than the last.
 
+## See it in action
+
+Before setting it up yourself, read [`examples/crit-system/walkthrough.md`](./examples/crit-system/walkthrough.md) — a complete session trace of adding a critical-hit system to a Godot roguelite, showing every artifact the skills produce.
+
 ## Setup
 
 ```

@@ -1,0 +1,12 @@
+{"ts": "2026-04-19T14:02:11Z", "skill": "start", "produces": "project_initialized"}
+{"ts": "2026-04-19T14:14:33Z", "skill": "design", "produces": "design_doc", "feature": "stamina-system"}
+{"ts": "2026-04-19T15:01:08Z", "skill": "build", "produces": "implementation", "feature": "stamina-system"}
+{"ts": "2026-04-19T15:22:45Z", "skill": "test", "produces": "tested", "feature": "stamina-system"}
+{"ts": "2026-04-19T15:28:12Z", "skill": "review", "produces": "reviewed", "feature": "stamina-system"}
+{"ts": "2026-04-19T15:34:02Z", "skill": "ship", "produces": "released", "version": "0.3.0"}
+{"ts": "2026-04-22T10:18:44Z", "skill": "design", "produces": "design_doc", "feature": "crit-system"}
+{"ts": "2026-04-22T10:31:19Z", "skill": "build", "produces": "implementation", "feature": "crit-system"}
+{"ts": "2026-04-22T10:41:55Z", "skill": "test", "produces": "tested", "feature": "crit-system"}
+{"ts": "2026-04-22T10:48:02Z", "skill": "review", "produces": "reviewed", "feature": "crit-system"}
+{"ts": "2026-04-22T10:55:34Z", "skill": "ship", "produces": "released", "version": "0.4.0"}
+{"ts": "2026-04-22T10:57:10Z", "skill": "learn", "produces": "lesson_captured"}
